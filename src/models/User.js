@@ -1,6 +1,6 @@
-const config = require('config');
+const config = require('../config/default.json');
 const jwt = require('jsonwebtoken');
-const joi = require('joi');
+const Joi = require('joi');
 const mongoose = require('mongoose');
 
 const UserSchema = new mongoose.Schema({
@@ -24,5 +24,31 @@ const UserSchema = new mongoose.Schema({
         maxlength: 255
     },
     //An admin user will be the a seller that can also sell their products
-    isAdmin: Boolean
+    seller: {
+        type: Boolean,
+        required: true
+    }
 });
+
+//function that will generate the AuthToken 
+UserSchema.methods.generateAuthToken = function() {
+    const token = jwt.sign({_id: this._id, seller: this.seller}, config.myprivatekey)
+    return token;
+}
+
+const User = mongoose.model('User', UserSchema);    
+
+//Validates the attributes of the user using joi, the methods appended to joi are the validations to be made
+function validateUser(user){
+    const schema = {
+        name: Joi.string().min(3).max(50).required(),
+        email:Joi.string().min(5).max(255).required().email(),
+        password: Joi.string().min(3).max(255).required(),
+        seller: Joi.boolean()
+    };
+
+    return Joi.validate(user, schema);
+}
+
+exports.User = User;
+exports.validate = validateUser;
