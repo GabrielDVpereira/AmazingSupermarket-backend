@@ -6,20 +6,23 @@
     //metodo que vai retornar todos os mercados que já existem no banco de acordo com o a sua categoria
     async category(req, res){
         const { category } = req.query;
-        const markets = await Market.find({category: category});
-        res.send(markets);
+        const markets = await Market.find({ category: category });
+        if(!markets.length)
+          res.status(400).json({error: 'No markets found'});
+        else
+          res.send(markets)
     },
 
     async markets(req, res){
         const allMarkets = await Market.find();
-        res.send(allMarkets);
+        return res.send(allMarkets);
     },
 
     //retorna todos os mercados que estão associados a um usuário
     async userMarkets(req, res){
         const { owner_id } = req.body;
         const markets = await Market.find({owner: owner_id});
-        res.send(markets);
+        return res.send(markets);
     },
 
     //criação de mercados
@@ -27,11 +30,6 @@
         //com o multer, a requisição recebe um novo parâmetro, o file 4
         const { filename } = req.file;
         const { name, category, owner_id } = req.body;
-
-
-       console.log(req.file)
-        console.log(req.body)
-
         const user = await User.findById(owner_id);
 
         if(!user) return res.status(400).json({error: "user doesn't exist!"})
