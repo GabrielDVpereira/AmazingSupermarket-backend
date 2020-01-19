@@ -20,8 +20,8 @@ module.exports = {
             email: req.body.email,
         });
         //encrypt the password
-       
-        //user.password = await bcrypt.hash(user.password, 20);
+
+        user.password = await bcrypt.hash(user.password, 10);
         await user.save(); //savers the user to the database
         const token = user.generateAuthToken();
         res.header("x-auth-token", token).send({
@@ -39,13 +39,23 @@ module.exports = {
     async authenticate(req, res) {
         console.log("authUser")
         const {email, password }  = req.body;
+        console.log(email)
+        console.log(password)
         const user = await User.findOne({email: email});
         if(user){
-            //if user exists, compare the password from the query to the user's hashed password in the database
-            //res.send(response) will send true if it matches, and false if it doesnt
+
+            // if user exists, compare the password from the query to the user's hashed password in the database
+            // res.send(response) will send true if it matches, and false if it doesnt
             bcrypt.compare(password, user.password, function(err, response) {
+
                 if(response){
                     const token = user.generateAuthToken();
+                    console.log({
+                        _id: user._id,
+                        name: user.name,
+                        email: user.email,
+                        token
+                    });
                     res.json({
                         _id: user._id,
                         name: user.name,

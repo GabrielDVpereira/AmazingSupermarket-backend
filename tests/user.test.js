@@ -51,3 +51,4 @@ describe('User model', () =>{
         expect(token).toBeTruthy();
     })
 })
+
